@@ -1,0 +1,199 @@
+################################################################################
+# Project:  Lib Qt
+# Purpose:  CMake build scripts
+# Author:   Dmitry Baryshnikov, dmitry.baryshnikov@nexgis.com
+################################################################################
+# Copyright (C) 2017, NextGIS <info@nextgis.com>
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# DEALINGS IN THE SOFTWARE.
+################################################################################
+cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
+
+project(qt4)
+
+# some init settings
+set(CMAKE_COLOR_MAKEFILE ON)
+# set path to additional CMake modules
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
+
+if(OSX_FRAMEWORK AND (BUILD_SHARED_LIBS OR BUILD_STATIC_LIBS))
+  message(FATAL_ERROR "Only OSX_FRAMEWORK key or any or both BUILD_SHARED_LIBS
+                       and BUILD_STATIC_LIBS keys are permitted")
+endif()
+
+include(util)
+check_version(QT_MAJOR_VERSION QT_MINOR_VERSION QT_REV_VERSION)
+set(VERSION "${QT_MAJOR_VERSION}.${QT_MINOR_VERSION}.${QT_REV_VERSION}")
+report_version(${PROJECT_NAME} ${VERSION})
+
+if(QT_MAJOR_VERSION LESS 5)
+    set(SUBFOLDER "")
+    set(CONFIGURE_ARGS -prefix-install -prefix ${CMAKE_INSTALL_PREFIX} -opensource -confirm-license -shared -no-qt3support -no-multimedia -no-gif -no-phonon -system-sqlite -system-zlib -system-libtiff -system-libpng -system-libjpeg -nomake examples -nomake demos -nomake docs)
+else()
+    set(SUBFOLDER "single/")
+    set(CONFIGURE_ARGS "-prefix ${CMAKE_INSTALL_PREFIX} -opensource -confirm-license -shared -no-gif -system-sqlite -system-zlib -system-libpng -system-libjpeg -no-compile-examples")
+endif()
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -debug)
+elseif(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+    set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -debug-and-release)
+else()
+    set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -release)
+endif()
+
+#http://download.qt.io/official_releases/qt/5.7/5.7.1/single/qt-everywhere-opensource-src-5.7.1.tar.gz
+set(QT_INPUT_NAME "qt-everywhere-opensource-src-${VERSION}")
+set(DOWNLOAD_URL "http://download.qt.io/official_releases/qt/${QT_MAJOR_VERSION}.${QT_MINOR_VERSION}/${VERSION}/${SUBFOLDER}${QT_INPUT_NAME}.tar.gz")
+set(OUT_NAME "qt.tar.gz")
+
+if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${OUT_NAME}")
+    message(STATUS "Download ${DOWNLOAD_URL}")
+    file(DOWNLOAD "${DOWNLOAD_URL}" "${CMAKE_CURRENT_BINARY_DIR}/${OUT_NAME}"
+         SHOW_PROGRESS
+     )
+endif()
+
+include(ProcessorCount)
+ProcessorCount(N)
+if(NOT N OR N EQUAL 0)
+    set(N 1)
+endif()
+
+find_package(Git)
+if(NOT GIT_FOUND)
+  message(FATAL_ERROR "git is required")
+endif()
+
+include(FindAnyProject)
+
+find_anyproject(ZLIB DEFAULT ON)
+if(ZLIB_FOUND)
+    set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -I${ZLIB_INCLUDE_DIR})
+    if(TARGET ${ZLIB_LIBRARY})
+        get_target_property(LINK_SEARCH_PATH ${ZLIB_LIBRARY} LOCATION)
+        get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} DIRECTORY)
+        set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -L${PARENT_DIR})
+    endif()
+endif()
+
+find_anyproject(JPEG DEFAULT ON)
+if(JPEG_FOUND)
+    set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -I${JPEG_INCLUDE_DIR})
+    if(TARGET ${JPEG_LIBRARY})
+        get_target_property(LINK_SEARCH_PATH ${JPEG_LIBRARY} LOCATION)
+        get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} DIRECTORY)
+        set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -L${PARENT_DIR})
+    endif()
+endif()
+
+find_anyproject(TIFF DEFAULT ON)
+if(TIFF_FOUND)
+    set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -I${TIFF_INCLUDE_DIR})
+    if(TARGET ${TIFF_LIBRARY})
+        get_target_property(LINK_SEARCH_PATH ${TIFF_LIBRARY} LOCATION)
+        get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} DIRECTORY)
+        set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -L${PARENT_DIR})
+    endif()
+endif()
+
+find_anyproject(PNG DEFAULT ON)
+if(PNG_FOUND)
+    set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -I${PNG_INCLUDE_DIR})
+    if(TARGET ${PNG_LIBRARY})
+        get_target_property(LINK_SEARCH_PATH ${PNG_LIBRARY} LOCATION)
+        get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} DIRECTORY)
+        set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -L${PARENT_DIR})
+    endif()
+endif()
+
+find_anyproject(SQLite3 DEFAULT ON)
+if(SQLITE3_FOUND)
+    set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -I${SQLITE3_INCLUDE_DIR})
+    if(TARGET ${SQLITE3_LIBRARY})
+        get_target_property(LINK_SEARCH_PATH ${SQLITE3_LIBRARY} LOCATION)
+        get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} DIRECTORY)
+        set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -L${PARENT_DIR})
+    endif()
+endif()
+
+if(WIN32)
+    set(CONFIGURE_CMD_NAME configure.exe)
+else()
+    set(CONFIGURE_CMD_NAME configure)
+endif()
+
+message(STATUS "Configure args: ${CONFIGURE_ARGS}")
+
+add_custom_target(extract ALL ${CMAKE_COMMAND} -E tar xzf ${CMAKE_CURRENT_BINARY_DIR}/${OUT_NAME}
+    DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${OUT_NAME}"
+    VERBATIM
+)
+
+if(APPLE)
+    add_custom_target(patch ALL ${GIT_EXECUTABLE} apply ${CMAKE_CURRENT_SOURCE_DIR}/patch/mac.patch
+        DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${OUT_NAME}" extract
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
+        VERBATIM
+    )
+endif()
+
+add_custom_target(configure ALL ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}/${CONFIGURE_CMD_NAME} ${CONFIGURE_ARGS}
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${CONFIGURE_CMD_NAME} patch
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
+    VERBATIM
+)
+
+#TODO: Fix on WINDOWS
+add_custom_target(build_qt ALL make -j ${N}
+    DEPENDS configure
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
+    VERBATIM
+)
+
+install(CODE "execute_process(
+              COMMAND make install
+              WORKING_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
+             )"
+)
+
+if (REGISTER_PACKAGE)
+    set(INSTALL_LIB_DIR ${CMAKE_INSTALL_PREFIX}/include)
+
+# TODO:   export(TARGETS ${LIB_NAME} FILE ${LIB_NAME}-exports.cmake)
+
+    set(EXPORT_PACKAGE_NAME Qt4)
+    set(EXPORT_PACKAGE_NAME_UPPER QT4)
+    set(EXPORT_PACKAGE_LIB_NAME qt4)
+
+    export(PACKAGE ${EXPORT_PACKAGE_NAME})
+
+    include(CMakePackageConfigHelpers)
+    configure_package_config_file(
+        ${CMAKE_SOURCE_DIR}/cmake/PackageConfig.cmake.in
+        ${CMAKE_CURRENT_BINARY_DIR}/${EXPORT_PACKAGE_NAME}Config.cmake
+        INSTALL_DESTINATION ${INSTALL_LIB_DIR}/cmake
+        PATH_VARS INSTALL_INC_DIR )
+    write_basic_package_version_file(
+        ${CMAKE_CURRENT_BINARY_DIR}/${EXPORT_PACKAGE_NAME}ConfigVersion.cmake
+        VERSION ${VERSION}
+        COMPATIBILITY AnyNewerVersion )
+#else()
+#    export(TARGETS ${LIB_NAME} FILE ${LIB_NAME}-exports.cmake EXPORT_LINK_INTERFACE_LIBRARIES)
+endif()
