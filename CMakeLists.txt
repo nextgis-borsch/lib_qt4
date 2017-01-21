@@ -64,16 +64,16 @@ set(DOWNLOAD_URL "http://download.qt.io/official_releases/qt/${QT_MAJOR_VERSION}
 set(OUT_NAME "qt.tar.gz")
 
 if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${OUT_NAME}")
-    message(STATUS "Download ${DOWNLOAD_URL}")
+    status_message("Download ${DOWNLOAD_URL}")
     file(DOWNLOAD "${DOWNLOAD_URL}" "${CMAKE_CURRENT_BINARY_DIR}/${OUT_NAME}"
          SHOW_PROGRESS
      )
 endif()
 
 include(ProcessorCount)
-ProcessorCount(N)
-if(NOT N OR N EQUAL 0)
-    set(N 1)
+ProcessorCount(CPU_COUNT)
+if(NOT CPU_COUNT OR CPU_COUNT EQUAL 0)
+    set(CPU_COUNT 1)
 endif()
 
 find_package(Git)
@@ -83,6 +83,13 @@ endif()
 
 include(FindAnyProject)
 
+macro(create_symlink PATH_TO_LIB LIB_NAME)
+    if(OSX_FRAMEWORK)
+        warning_message("Create symlink ${PATH_TO_LIB}/lib${LIB_NAME}.so")
+        execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${PATH_TO_LIB}/${LIB_NAME} ${PATH_TO_LIB}/lib${LIB_NAME}.so)
+    endif()
+endmacro()
+
 find_anyproject(ZLIB DEFAULT ON)
 if(ZLIB_FOUND)
     set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -I${ZLIB_INCLUDE_DIR})
@@ -90,6 +97,8 @@ if(ZLIB_FOUND)
         get_target_property(LINK_SEARCH_PATH ${ZLIB_LIBRARY} LOCATION)
         get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} DIRECTORY)
         set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -L${PARENT_DIR})
+
+        create_symlink(${PARENT_DIR} "z")
     endif()
 endif()
 
@@ -100,6 +109,8 @@ if(JPEG_FOUND)
         get_target_property(LINK_SEARCH_PATH ${JPEG_LIBRARY} LOCATION)
         get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} DIRECTORY)
         set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -L${PARENT_DIR})
+
+        create_symlink(${PARENT_DIR} "jpeg")
     endif()
 endif()
 
@@ -110,6 +121,8 @@ if(TIFF_FOUND)
         get_target_property(LINK_SEARCH_PATH ${TIFF_LIBRARY} LOCATION)
         get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} DIRECTORY)
         set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -L${PARENT_DIR})
+
+        create_symlink(${PARENT_DIR} "tiff")
     endif()
 endif()
 
@@ -120,6 +133,8 @@ if(PNG_FOUND)
         get_target_property(LINK_SEARCH_PATH ${PNG_LIBRARY} LOCATION)
         get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} DIRECTORY)
         set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -L${PARENT_DIR})
+
+        create_symlink(${PARENT_DIR} "png")
     endif()
 endif()
 
@@ -130,6 +145,8 @@ if(SQLITE3_FOUND)
         get_target_property(LINK_SEARCH_PATH ${SQLITE3_LIBRARY} LOCATION)
         get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} DIRECTORY)
         set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -L${PARENT_DIR})
+
+        create_symlink(${PARENT_DIR} "sqlite3")
     endif()
 endif()
 
@@ -141,28 +158,25 @@ endif()
 
 message(STATUS "Configure args: ${CONFIGURE_ARGS}")
 
-add_custom_target(extract ALL ${CMAKE_COMMAND} -E tar xzf ${CMAKE_CURRENT_BINARY_DIR}/${OUT_NAME}
-    DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${OUT_NAME}"
-    VERBATIM
-)
+if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME})
+    status_message("Extract ${CMAKE_CURRENT_BINARY_DIR}/${OUT_NAME}")
+    execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf ${CMAKE_CURRENT_BINARY_DIR}/${OUT_NAME})
+endif()
 
 if(APPLE)
-    add_custom_target(patch ALL ${GIT_EXECUTABLE} apply ${CMAKE_CURRENT_SOURCE_DIR}/patch/mac.patch
-        DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${OUT_NAME}" extract
+    status_message("Apply patch ${CMAKE_CURRENT_SOURCE_DIR}/patch/mac.patch")
+    execute_process(COMMAND ${GIT_EXECUTABLE} apply -v ${CMAKE_CURRENT_SOURCE_DIR}/patch/mac.patch
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
-        VERBATIM
     )
 endif()
 
-add_custom_target(configure ALL ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}/${CONFIGURE_CMD_NAME} ${CONFIGURE_ARGS}
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${CONFIGURE_CMD_NAME} patch
+status_message("Configure")
+execute_process(COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}/${CONFIGURE_CMD_NAME} ${CONFIGURE_ARGS}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
-    VERBATIM
 )
 
 #TODO: Fix on WINDOWS
-add_custom_target(build_qt ALL make -j ${N}
-    DEPENDS configure
+add_custom_target(build_qt ALL make -j ${CPU_COUNT}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
     VERBATIM
 )
@@ -174,7 +188,9 @@ install(CODE "execute_process(
 )
 
 if (REGISTER_PACKAGE)
-    set(INSTALL_LIB_DIR ${CMAKE_INSTALL_PREFIX}/include)
+    set(INSTALL_INC_DIR ${CMAKE_INSTALL_PREFIX}/include)
+    set(INSTALL_LIB_DIR ${CMAKE_INSTALL_PREFIX}/lib)
+    set(INSTALL_BIN_DIR ${CMAKE_INSTALL_PREFIX}/bin)
 
 # TODO:   export(TARGETS ${LIB_NAME} FILE ${LIB_NAME}-exports.cmake)
 
@@ -188,7 +204,7 @@ if (REGISTER_PACKAGE)
     configure_package_config_file(
         ${CMAKE_SOURCE_DIR}/cmake/PackageConfig.cmake.in
         ${CMAKE_CURRENT_BINARY_DIR}/${EXPORT_PACKAGE_NAME}Config.cmake
-        INSTALL_DESTINATION ${INSTALL_LIB_DIR}/cmake
+        INSTALL_DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
         PATH_VARS INSTALL_INC_DIR )
     write_basic_package_version_file(
         ${CMAKE_CURRENT_BINARY_DIR}/${EXPORT_PACKAGE_NAME}ConfigVersion.cmake
