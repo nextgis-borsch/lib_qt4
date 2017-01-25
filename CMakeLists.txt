@@ -44,7 +44,7 @@ report_version(${PROJECT_NAME} ${VERSION})
 
 if(QT_MAJOR_VERSION LESS 5)
     set(SUBFOLDER "")
-    set(CONFIGURE_ARGS -prefix-install -prefix ${CMAKE_INSTALL_PREFIX} -opensource -confirm-license -shared -no-qt3support -no-multimedia -no-gif -no-phonon -system-sqlite -system-zlib -system-libtiff -system-libpng -system-libjpeg -nomake examples -nomake demos -nomake docs)
+    set(CONFIGURE_ARGS -prefix-install -prefix ${CMAKE_INSTALL_PREFIX} -opensource -confirm-license -shared -no-qt3support -no-multimedia -no-gif -no-phonon -system-sqlite -system-zlib -system-libtiff -system-libpng -system-libjpeg -nomake examples -nomake demos -nomake docs -no-rpath)
 else()
     set(SUBFOLDER "single/")
     set(CONFIGURE_ARGS "-prefix ${CMAKE_INSTALL_PREFIX} -opensource -confirm-license -shared -no-gif -system-sqlite -system-zlib -system-libpng -system-libjpeg -no-compile-examples")
@@ -150,6 +150,21 @@ if(SQLITE3_FOUND)
     endif()
 endif()
 
+find_anyproject(OpenSSL DEFAULT ON)
+if(OPENSSL_FOUND)
+    set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -I${OPENSSL_INCLUDE_DIR})
+    if(TARGET ${OPENSSL_LIBRARY})
+        get_target_property(LINK_SEARCH_PATH ${OPENSSL_LIBRARY} LOCATION)
+        get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} DIRECTORY)
+        set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -L${PARENT_DIR})
+
+        create_symlink(${PARENT_DIR} "openssl")
+
+        set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -openssl-linked)
+        set(ENV{OPENSSL_LIBS} "-L${PARENT_DIR} -lopenssl")
+    endif()
+endif()
+
 if(WIN32)
     set(CONFIGURE_CMD_NAME configure.exe)
 else()
@@ -170,6 +185,11 @@ if(APPLE)
     )
 endif()
 
+status_message("Apply patch ${CMAKE_CURRENT_SOURCE_DIR}/patch/openssl.patch")
+execute_process(COMMAND ${GIT_EXECUTABLE} apply -v ${CMAKE_CURRENT_SOURCE_DIR}/patch/openssl.patch
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
+)
+
 status_message("Configure")
 execute_process(COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}/${CONFIGURE_CMD_NAME} ${CONFIGURE_ARGS}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
@@ -186,6 +206,14 @@ install(CODE "execute_process(
               WORKING_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
              )"
 )
+
+if(OSX_FRAMEWORK)
+    find_package(PythonInterp REQUIRED)
+    install(CODE "execute_process(COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/cmake/mac_rpath_fix.py
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        )"
+    )
+endif()
 
 if (REGISTER_PACKAGE)
     set(INSTALL_INC_DIR ${CMAKE_INSTALL_PREFIX}/include)
