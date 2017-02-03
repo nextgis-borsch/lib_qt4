@@ -44,7 +44,7 @@ report_version(${PROJECT_NAME} ${VERSION})
 
 if(QT_MAJOR_VERSION LESS 5)
     set(SUBFOLDER "")
-    set(CONFIGURE_ARGS -prefix-install -prefix ${CMAKE_INSTALL_PREFIX} -opensource -confirm-license -shared -no-qt3support -no-multimedia -no-gif -no-phonon -system-sqlite -system-zlib -system-libtiff -system-libpng -system-libjpeg -make tools -nomake examples -nomake demos -nomake docs -no-rpath -webkit)
+    set(CONFIGURE_ARGS -prefix-install -prefix ${CMAKE_INSTALL_PREFIX} -opensource -confirm-license -shared -no-qt3support -no-multimedia -no-gif -no-phonon -system-sqlite -system-zlib -system-libtiff -system-libpng -system-libjpeg -nomake examples -nomake demos -nomake docs -no-rpath -webkit)
 else()
     set(SUBFOLDER "single/")
     set(CONFIGURE_ARGS "-prefix ${CMAKE_INSTALL_PREFIX} -opensource -confirm-license -shared -no-gif -system-sqlite -system-zlib -system-libpng -system-libjpeg -no-compile-examples")
