@@ -44,7 +44,17 @@ report_version(${PROJECT_NAME} ${VERSION})
 
 if(QT_MAJOR_VERSION LESS 5)
     set(SUBFOLDER "")
-    set(CONFIGURE_ARGS -prefix-install -prefix ${CMAKE_INSTALL_PREFIX} -opensource -confirm-license -shared -no-qt3support -no-multimedia -no-gif -no-phonon -system-sqlite -system-zlib -system-libtiff -system-libpng -system-libjpeg -nomake examples -nomake demos -nomake docs -no-rpath -webkit)
+    set(CONFIGURE_ARGS -prefix ${CMAKE_INSTALL_PREFIX} -opensource -confirm-license -shared -no-qt3support -no-multimedia -no-gif -no-phonon -system-sqlite -system-zlib -system-libtiff -system-libpng -system-libjpeg -nomake examples -nomake demos -nomake docs -webkit)
+    
+    if(OSX_FRAMEWORK)
+        set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -prefix-install -no-rpath)
+    endif()
+    
+    if(WIN32)
+        if(MSVC)
+            set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -platform win32-msvc2013)
+        endif()
+    endif()
 else()
     set(SUBFOLDER "single/")
     set(CONFIGURE_ARGS "-prefix ${CMAKE_INSTALL_PREFIX} -opensource -confirm-license -shared -no-gif -system-sqlite -system-zlib -system-libpng -system-libjpeg -no-compile-examples")
@@ -94,10 +104,15 @@ find_anyproject(ZLIB DEFAULT ON)
 if(ZLIB_FOUND)
     set(CONFIGURE_ARGS_INCLUDE_DIRS ${CONFIGURE_ARGS_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIR})
     if(TARGET ${ZLIB_LIBRARY})
-        get_target_property(LINK_SEARCH_PATH ${ZLIB_LIBRARY} LOCATION)
+        get_target_property(LINK_SEARCH_PATH ${ZLIB_LIBRARY} IMPORTED_IMPLIB_RELEASE)
         get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} DIRECTORY)
-        set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -L${PARENT_DIR})
-
+        set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -L ${PARENT_DIR})
+        
+        if(WIN32)
+            warning_message("Copy ${LINK_SEARCH_PATH}")
+            execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${LINK_SEARCH_PATH} ${PARENT_DIR}/zdll.lib)
+        endif()
+        
         create_symlink(${PARENT_DIR} "z")
     endif()
 endif()
@@ -106,9 +121,14 @@ find_anyproject(JPEG DEFAULT ON)
 if(JPEG_FOUND)
     set(CONFIGURE_ARGS_INCLUDE_DIRS ${CONFIGURE_ARGS_INCLUDE_DIRS} ${JPEG_INCLUDE_DIR})
     if(TARGET ${JPEG_LIBRARY})
-        get_target_property(LINK_SEARCH_PATH ${JPEG_LIBRARY} LOCATION)
+        get_target_property(LINK_SEARCH_PATH ${JPEG_LIBRARY} IMPORTED_IMPLIB_RELEASE)
         get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} DIRECTORY)
-        set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -L${PARENT_DIR})
+        set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -L ${PARENT_DIR})
+    
+        if(WIN32)
+            warning_message("Copy ${LINK_SEARCH_PATH}")
+            execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${LINK_SEARCH_PATH} ${PARENT_DIR}/libjpeg.lib)
+        endif()
 
         create_symlink(${PARENT_DIR} "jpeg")
     endif()
@@ -118,10 +138,15 @@ find_anyproject(TIFF DEFAULT ON)
 if(TIFF_FOUND)
     set(CONFIGURE_ARGS_INCLUDE_DIRS ${CONFIGURE_ARGS_INCLUDE_DIRS} ${TIFF_INCLUDE_DIR})
     if(TARGET ${TIFF_LIBRARY})
-        get_target_property(LINK_SEARCH_PATH ${TIFF_LIBRARY} LOCATION)
+        get_target_property(LINK_SEARCH_PATH ${TIFF_LIBRARY} IMPORTED_IMPLIB_RELEASE)
         get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} DIRECTORY)
-        set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -L${PARENT_DIR})
-
+        set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -L ${PARENT_DIR})
+    
+        if(WIN32)
+            warning_message("Copy ${LINK_SEARCH_PATH}")
+            execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${LINK_SEARCH_PATH} ${PARENT_DIR}/libtiff.lib)
+        endif()
+        
         create_symlink(${PARENT_DIR} "tiff")
     endif()
 endif()
@@ -130,9 +155,9 @@ find_anyproject(PNG DEFAULT ON)
 if(PNG_FOUND)
     set(CONFIGURE_ARGS_INCLUDE_DIRS ${CONFIGURE_ARGS_INCLUDE_DIRS} ${PNG_INCLUDE_DIR})
     if(TARGET ${PNG_LIBRARY})
-        get_target_property(LINK_SEARCH_PATH ${PNG_LIBRARY} LOCATION)
+        get_target_property(LINK_SEARCH_PATH ${PNG_LIBRARY} IMPORTED_IMPLIB_RELEASE)
         get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} DIRECTORY)
-        set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -L${PARENT_DIR})
+        set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -L ${PARENT_DIR})
 
         create_symlink(${PARENT_DIR} "png")
     endif()
@@ -142,9 +167,9 @@ find_anyproject(SQLite3 DEFAULT ON)
 if(SQLITE3_FOUND)
     set(CONFIGURE_ARGS_INCLUDE_DIRS ${CONFIGURE_ARGS_INCLUDE_DIRS} ${SQLITE3_INCLUDE_DIR})
     if(TARGET ${SQLITE3_LIBRARY})
-        get_target_property(LINK_SEARCH_PATH ${SQLITE3_LIBRARY} LOCATION)
+        get_target_property(LINK_SEARCH_PATH ${SQLITE3_LIBRARY} IMPORTED_IMPLIB_RELEASE)
         get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} DIRECTORY)
-        set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -L${PARENT_DIR})
+        set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -L ${PARENT_DIR})
 
         create_symlink(${PARENT_DIR} "sqlite3")
     endif()
@@ -154,19 +179,25 @@ find_anyproject(OpenSSL DEFAULT ON)
 if(OPENSSL_FOUND)
     set(CONFIGURE_ARGS_INCLUDE_DIRS ${CONFIGURE_ARGS_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR})
     if(TARGET ${OPENSSL_LIBRARY})
-        get_target_property(LINK_SEARCH_PATH ${OPENSSL_LIBRARY} LOCATION)
+        get_target_property(LINK_SEARCH_PATH ${OPENSSL_LIBRARY} IMPORTED_IMPLIB_RELEASE)
         get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} DIRECTORY)
-        set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -L${PARENT_DIR})
+        set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -L ${PARENT_DIR})
 
         create_symlink(${PARENT_DIR} "openssl")
 
         set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -openssl-linked)
-        set(ENV{OPENSSL_LIBS} "-L${PARENT_DIR} -lopenssl")
+        
+        if(WIN32)
+            set(CONFIGURE_ARGS ${CONFIGURE_ARGS} "OPENSSL_LIBS=\"-lopenssl\"")
+        else()
+            set(ENV{OPENSSL_LIBS} "-L${PARENT_DIR} -lopenssl")
+        endif()
+
     endif()
 endif()
 
 foreach(CONF_INC_DIR ${CONFIGURE_ARGS_INCLUDE_DIRS})
-    list(APPEND CONFIGURE_ARGS -I${CONF_INC_DIR})
+    list(APPEND CONFIGURE_ARGS -I ${CONF_INC_DIR})
 endforeach()
 
 if(WIN32)
@@ -190,26 +221,39 @@ if(APPLE)
 endif()
 
 status_message("Apply patch ${CMAKE_CURRENT_SOURCE_DIR}/patch/openssl.patch")
-execute_process(COMMAND ${GIT_EXECUTABLE} apply -v ${CMAKE_CURRENT_SOURCE_DIR}/patch/openssl.patch
+execute_process(COMMAND ${GIT_EXECUTABLE} apply -v --whitespace=fix ${CMAKE_CURRENT_SOURCE_DIR}/patch/openssl.patch
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
 )
 
-status_message("Configure")
+status_message("Configure in ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}")
+message(${CONFIGURE_ARGS})
 execute_process(COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}/${CONFIGURE_CMD_NAME} ${CONFIGURE_ARGS}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
 )
 
 #TODO: Fix on WINDOWS
-add_custom_target(build_qt ALL make -j ${CPU_COUNT}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
-    VERBATIM
-)
+if(WIN32)
+    add_custom_target(build_qt ALL nmake
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
+        VERBATIM
+    )
+    install(CODE "execute_process(
+        COMMAND nmake install
+        WORKING_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
+        )"
+    )
 
-install(CODE "execute_process(
-              COMMAND make install
-              WORKING_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
-             )"
-)
+else()
+    add_custom_target(build_qt ALL make -j ${CPU_COUNT}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
+        VERBATIM
+    )
+    install(CODE "execute_process(
+        COMMAND make install
+        WORKING_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
+        )"
+    )
+endif()
 
 if(OSX_FRAMEWORK)
     find_package(PythonInterp REQUIRED)
