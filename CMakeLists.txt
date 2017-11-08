@@ -44,8 +44,8 @@ report_version(${PROJECT_NAME} ${VERSION})
 
 if(QT_MAJOR_VERSION LESS 5)
     set(SUBFOLDER "")
-    set(CONFIGURE_ARGS -prefix ${CMAKE_INSTALL_PREFIX} -opensource -confirm-license -shared -no-qt3support -no-multimedia -no-gif -no-phonon -system-sqlite -system-zlib -system-libtiff -system-libpng -system-libjpeg -nomake examples -nomake demos -nomake docs -webkit)
-
+    set(CONFIGURE_ARGS -prefix ${CMAKE_INSTALL_PREFIX} -opensource -confirm-license -shared -no-qt3support -no-multimedia -no-phonon -system-sqlite -system-zlib -system-libtiff -system-libpng -system-libjpeg -nomake examples -nomake demos -nomake docs -webkit)
+# -no-gif
     if(OSX_FRAMEWORK)
         set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -prefix-install -no-rpath)
     endif()
@@ -57,7 +57,7 @@ if(QT_MAJOR_VERSION LESS 5)
     endif()
 else()
     set(SUBFOLDER "single/")
-    set(CONFIGURE_ARGS "-prefix ${CMAKE_INSTALL_PREFIX} -opensource -confirm-license -shared -no-gif -system-sqlite -system-zlib -system-libpng -system-libjpeg -no-compile-examples")
+    set(CONFIGURE_ARGS "-prefix ${CMAKE_INSTALL_PREFIX} -opensource -confirm-license -shared -system-sqlite -system-zlib -system-libpng -system-libjpeg -no-compile-examples")
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
