@@ -179,6 +179,23 @@ if(PNG_FOUND)
     endif()
 endif()
 
+
+find_anyproject(GIF DEFAULT ON)
+if(GIF_FOUND)
+    set(CONFIGURE_ARGS_INCLUDE_DIRS ${CONFIGURE_ARGS_INCLUDE_DIRS} ${GIF_INCLUDE_DIR})
+    if(TARGET ${GIF_LIBRARY})
+        if(WIN32)
+            get_target_property(LINK_SEARCH_PATH ${GIF_LIBRARY} IMPORTED_IMPLIB_RELEASE)
+        else()
+            get_target_property(LINK_SEARCH_PATH ${GIF_LIBRARY} LOCATION)
+        endif()
+        get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} DIRECTORY)
+        set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -L ${PARENT_DIR})
+
+        create_symlink(${PARENT_DIR} "gif")
+    endif()
+endif()
+
 find_anyproject(SQLite3 DEFAULT ON)
 if(SQLITE3_FOUND)
     set(CONFIGURE_ARGS_INCLUDE_DIRS ${CONFIGURE_ARGS_INCLUDE_DIRS} ${SQLITE3_INCLUDE_DIR})
