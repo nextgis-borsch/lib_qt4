@@ -78,7 +78,7 @@ if(WIN32)
         elseif(MSVC_VERSION EQUAL 1900)
             set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -platform win32-msvc2015)
         elseif(MSVC_VERSION GREATER 1900)
-            set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -platform win32-msvc2017)
+            set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -platform win32-msvc) # 2017
         endif()
     endif()
 endif()
@@ -381,7 +381,7 @@ if(WIN32)
     set(CONFIGURE_CMD ${VCVARSALL_BAT} ${VCVARSALL_BAT_ARG} && ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}/${CONFIGURE_CMD_NAME} ${CONFIGURE_ARGS})
 
     execute_process(
-        COMMAND ${CONFIGURE_CMD} -prefix ${CMAKE_INSTALL_PREFIX}
+        COMMAND ${CONFIGURE_CMD} -prefix ${CMAKE_INSTALL_PREFIX}  -prefix-install ${CMAKE_INSTALL_PREFIX}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
     )
 
