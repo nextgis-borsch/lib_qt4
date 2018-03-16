@@ -51,6 +51,8 @@ for f in files:
         lib_path = os.path.realpath(os.path.join(f, lib_name))
         for rpath in lib_rpaths:
             run(('install_name_tool', '-change', rpath, '@rpath/' + rpath, lib_path))
+        run(('install_name_tool', '-change', '/usr/lib/libz.1.dylib', '@rpath/zlib.framework/Versions/1/zlib', lib_path))
+
 # plugins
 qt_install_plg_path = os.path.join(qt_path, 'plugins')
 files = glob.glob(qt_install_plg_path + "/*/*.dylib")
@@ -61,3 +63,4 @@ for f in files:
         run(('install_name_tool', '-add_rpath', '@loader_path/../../../Frameworks/', f)) #/plugins/4/crypto
         for rpath in lib_rpaths:
             run(('install_name_tool', '-change', rpath, '@rpath/' + rpath, f))
+        run(('install_name_tool', '-change', '/usr/lib/libz.1.dylib', '@rpath/zlib.framework/Versions/1/zlib', f))
