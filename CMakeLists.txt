@@ -330,21 +330,21 @@ endif()
 
 if(APPLE)
     status_message("Apply patch ${CMAKE_CURRENT_SOURCE_DIR}/patch/mac.patch")
-    execute_process(COMMAND ${GIT_EXECUTABLE} apply -v ${CMAKE_CURRENT_SOURCE_DIR}/patch/mac.patch
+    execute_process(COMMAND ${GIT_EXECUTABLE} apply --ignore-whitespace -v  ${CMAKE_CURRENT_SOURCE_DIR}/patch/mac.patch
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
     )
     status_message("Apply patch ${CMAKE_CURRENT_SOURCE_DIR}/pointer_comparison_to_0.patch")
-    execute_process(COMMAND ${GIT_EXECUTABLE} apply -v ${CMAKE_CURRENT_SOURCE_DIR}/patch/pointer_comparison_to_0.patch
+    execute_process(COMMAND ${GIT_EXECUTABLE} apply --ignore-whitespace -v  ${CMAKE_CURRENT_SOURCE_DIR}/patch/pointer_comparison_to_0.patch
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
     )
     status_message("Apply patch ${CMAKE_CURRENT_SOURCE_DIR}/xcode91.patch")
-    execute_process(COMMAND ${GIT_EXECUTABLE} apply -v ${CMAKE_CURRENT_SOURCE_DIR}/patch/xcode91.patch
+    execute_process(COMMAND ${GIT_EXECUTABLE} apply --ignore-whitespace -v  ${CMAKE_CURRENT_SOURCE_DIR}/patch/xcode91.patch
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
     )
 endif()
 
 status_message("Apply patch ${CMAKE_CURRENT_SOURCE_DIR}/patch/openssl.patch")
-execute_process(COMMAND ${GIT_EXECUTABLE} apply -v --whitespace=fix ${CMAKE_CURRENT_SOURCE_DIR}/patch/openssl.patch
+execute_process(COMMAND ${GIT_EXECUTABLE} apply --ignore-whitespace -v  ${CMAKE_CURRENT_SOURCE_DIR}/patch/openssl.patch
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
 )
 
@@ -358,7 +358,7 @@ message(STATUS "Configure args: ${CONFIGURE_ARGS}")
 status_message("Configure in ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}")
 
 if(WIN32)
-    set(CONFIGURE_CMD_NAME configure.bat)
+    set(CONFIGURE_CMD_NAME configure.exe)
     get_filename_component(VC_COMPILER_DIR ${CMAKE_CXX_COMPILER} DIRECTORY)
     find_file(VCVARSALL_BAT
         NAMES vsdevcmd.bat vcvarsall.bat
