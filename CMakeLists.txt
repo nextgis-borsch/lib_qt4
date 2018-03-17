@@ -78,7 +78,7 @@ if(WIN32)
         elseif(MSVC_VERSION EQUAL 1900)
             set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -platform win32-msvc2015)
         elseif(MSVC_VERSION GREATER 1900)
-            set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -platform win32-msvc) # 2017
+            set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -platform win32-msvc2015) # 2017
         endif()
     endif()
 endif()
@@ -295,14 +295,14 @@ if(POSTGRESQL_FOUND)
 endif()
 
 foreach(CONF_INC_DIR ${CONFIGURE_ARGS_INCLUDE_DIRS})
-    list(APPEND CONFIGURE_ARGS -I${CONF_INC_DIR})
+    list(APPEND CONFIGURE_ARGS -I ${CONF_INC_DIR})
 endforeach()
 
 foreach(CONF_LINK_LIB ${CONFIGURE_ARGS_LINK_LIBS})
     # if(OSX_FRAMEWORK)
         # list(APPEND CONFIGURE_ARGS -F${CONF_LINK_LIB})
     # else()
-        list(APPEND CONFIGURE_ARGS -L${CONF_LINK_LIB})
+        list(APPEND CONFIGURE_ARGS -L ${CONF_LINK_LIB})
     # endif()
 endforeach()
 
