@@ -112,8 +112,12 @@ if(ICONV_FOUND)
 		list(APPEND CONFIGURE_ARGS -l ${LINK_SEARCH_PATH})
 		set(ENV{ICONV_LIBS} "${LINK_SEARCH_PATH}")
 		get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} PATH)
+        set(CONFIGURE_ARGS_LINK_LIBS ${CONFIGURE_ARGS_LINK_LIBS} ${PARENT_DIR})
 		set(ENV{LIB} "$ENV{LIB};${PARENT_DIR}")
 		set(ENV{INCLUDE} "$ENV{INCLUDE};${ICONV_INCLUDE_DIRS}")
+
+        # Check if build needed
+        build_if_needed(${LINK_SEARCH_PATH} "ICONV" CPU_COUNT)
 	endif()
 endif()
 
@@ -132,20 +136,20 @@ if(ZLIB_FOUND)
             # set(CONFIGURE_ARGS ${CONFIGURE_ARGS} "-lzlib")
             # set(ENV_ARGS "${ENV_ARGS} LIBZ_LIBS=\"-lzlib\"")
             set(ENV{LIBZ_LIBS} "-L${PARENT_DIR} -lzlib")
-
-            # Check if build needed
-            build_if_needed(${LINK_SEARCH_PATH} "ZLIB" CPU_COUNT)
         elseif(WIN32)
             get_target_property(LINK_SEARCH_PATH ${ZLIB_LIBRARIES} IMPORTED_IMPLIB_RELEASE)
     		list(APPEND CONFIGURE_ARGS -l ${LINK_SEARCH_PATH})
     		set(ENV{LIBZ_LIBS} "${LINK_SEARCH_PATH}")
     		get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} PATH)
+            set(CONFIGURE_ARGS_LINK_LIBS ${CONFIGURE_ARGS_LINK_LIBS} ${PARENT_DIR})
     		set(ENV{LIB} "$ENV{LIB};${PARENT_DIR}")
     		set(ENV{INCLUDE} "$ENV{INCLUDE};${ZLIB_INCLUDE_DIRS}")
 
             # Stupid Qt4 build fix
             configure_file(${LINK_SEARCH_PATH} ${PARENT_DIR}/zdll.lib COPYONLY)
         endif()
+        # Check if build needed
+        build_if_needed(${LINK_SEARCH_PATH} "ZLIB" CPU_COUNT)
     endif()
 endif()
 
@@ -165,16 +169,17 @@ if(OPENSSL_FOUND)
             # set(ENV_ARGS "${ENV_ARGS} OPENSSL_LIBS=\"-lopenssl\"")
             set(ENV{OPENSSL_LIBS} "-L${PARENT_DIR} -lopenssl")
 
-            # Check if build needed
-            build_if_needed(${LINK_SEARCH_PATH} "OpenSSL" ${CPU_COUNT})
         elseif(WIN32)
             get_target_property(LINK_SEARCH_PATH ${OPENSSL_LIBRARIES} IMPORTED_IMPLIB_RELEASE)
             list(APPEND CONFIGURE_ARGS -l ${LINK_SEARCH_PATH})
             set(ENV{OPENSSL_LIBS} "${LINK_SEARCH_PATH}")
             get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} PATH)
+            set(CONFIGURE_ARGS_LINK_LIBS ${CONFIGURE_ARGS_LINK_LIBS} ${PARENT_DIR})
             set(ENV{LIB} "$ENV{LIB};${PARENT_DIR}")
             set(ENV{INCLUDE} "$ENV{INCLUDE};${OPENSSL_INCLUDE_DIRS}")
         endif()
+        # Check if build needed
+        build_if_needed(${LINK_SEARCH_PATH} "OpenSSL" ${CPU_COUNT})
     endif()
 endif()
 
@@ -195,16 +200,17 @@ if(FREETYPE_FOUND)
             # set(ENV_ARGS "${ENV_ARGS} FREETYPE_LIBS=\"-lfreetype\"")
             set(ENV{FREETYPE_LIBS} "-L${PARENT_DIR} -lfreetype")
 
-            # Check if build needed
-            build_if_needed(${LINK_SEARCH_PATH} "Freetype" ${CPU_COUNT})
         elseif(WIN32)
             get_target_property(LINK_SEARCH_PATH ${FREETYPE_LIBRARIES} IMPORTED_IMPLIB_RELEASE)
             list(APPEND CONFIGURE_ARGS -l ${LINK_SEARCH_PATH})
             set(ENV{FREETYPE_LIBS} "${LINK_SEARCH_PATH}")
             get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} PATH)
+            set(CONFIGURE_ARGS_LINK_LIBS ${CONFIGURE_ARGS_LINK_LIBS} ${PARENT_DIR})
             set(ENV{LIB} "$ENV{LIB};${PARENT_DIR}")
             set(ENV{INCLUDE} "$ENV{INCLUDE};${FREETYPE_INCLUDE_DIRS}")
         endif()
+        # Check if build needed
+        build_if_needed(${LINK_SEARCH_PATH} "Freetype" ${CPU_COUNT})
     endif()
 endif()
 
@@ -226,17 +232,17 @@ if(JPEG_FOUND)
             # set(CONFIGURE_ARGS ${CONFIGURE_ARGS} "-ljpeg")
             # set(ENV_ARGS "${ENV_ARGS} LIBJPEG_LIBS=\"-ljpeg\"")
             set(ENV{LIBJPEG_LIBS} "-L${PARENT_DIR} -ljpeg")
-
-            # Check if build needed
-            build_if_needed(${LINK_SEARCH_PATH} "JPEG" ${CPU_COUNT})
         elseif(WIN32)
             get_target_property(LINK_SEARCH_PATH ${JPEG_LIBRARIES} IMPORTED_IMPLIB_RELEASE)
             list(APPEND CONFIGURE_ARGS -l ${LINK_SEARCH_PATH})
             set(ENV{LIBJPEG_LIBS} "${LINK_SEARCH_PATH}")
             get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} PATH)
+            set(CONFIGURE_ARGS_LINK_LIBS ${CONFIGURE_ARGS_LINK_LIBS} ${PARENT_DIR})
             set(ENV{LIB} "$ENV{LIB};${PARENT_DIR}")
             set(ENV{INCLUDE} "$ENV{INCLUDE};${JPEG_INCLUDE_DIRS}")
         endif()
+        # Check if build needed
+        build_if_needed(${LINK_SEARCH_PATH} "JPEG" ${CPU_COUNT})
     endif()
 endif()
 
@@ -256,17 +262,17 @@ if(PNG_FOUND)
             # set(CONFIGURE_ARGS ${CONFIGURE_ARGS} "-lpng")
             # set(ENV_ARGS "${ENV_ARGS} LIBPNG_LIBS=\"-lpng\"")
             set(ENV{LIBPNG_LIBS} "-L${PARENT_DIR} -lpng")
-
-            # Check if build needed
-            build_if_needed(${LINK_SEARCH_PATH} "PNG" ${CPU_COUNT})
         elseif(WIN32)
             get_target_property(LINK_SEARCH_PATH ${PNG_LIBRARIES} IMPORTED_IMPLIB_RELEASE)
             list(APPEND CONFIGURE_ARGS -l ${LINK_SEARCH_PATH})
             set(ENV{LIBPNG_LIBS} "${LINK_SEARCH_PATH}")
             get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} PATH)
+            set(CONFIGURE_ARGS_LINK_LIBS ${CONFIGURE_ARGS_LINK_LIBS} ${PARENT_DIR})
             set(ENV{LIB} "$ENV{LIB};${PARENT_DIR}")
             set(ENV{INCLUDE} "$ENV{INCLUDE};${PNG_INCLUDE_DIRS}")
         endif()
+        # Check if build needed
+        build_if_needed(${LINK_SEARCH_PATH} "PNG" ${CPU_COUNT})
     endif()
 endif()
 
@@ -286,17 +292,17 @@ if(TIFF_FOUND)
             # set(CONFIGURE_ARGS ${CONFIGURE_ARGS} "-ltiff")
             # set(ENV_ARGS "${ENV_ARGS} TIFF_LIBS=\"-ltiff\"")
             set(ENV{TIFF_LIBS} "-L${PARENT_DIR} -ltiff")
-
-            # Check if build needed
-            build_if_needed(${LINK_SEARCH_PATH} "TIFF" ${CPU_COUNT})
         elseif(WIN32)
             get_target_property(LINK_SEARCH_PATH ${TIFF_LIBRARIES} IMPORTED_IMPLIB_RELEASE)
             list(APPEND CONFIGURE_ARGS -l ${LINK_SEARCH_PATH})
             set(ENV{TIFF_LIBS} "${LINK_SEARCH_PATH}")
             get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} PATH)
+            set(CONFIGURE_ARGS_LINK_LIBS ${CONFIGURE_ARGS_LINK_LIBS} ${PARENT_DIR})
             set(ENV{LIB} "$ENV{LIB};${PARENT_DIR}")
             set(ENV{INCLUDE} "$ENV{INCLUDE};${TIFF_INCLUDE_DIRS}")
         endif()
+        # Check if build needed
+        build_if_needed(${LINK_SEARCH_PATH} "TIFF" ${CPU_COUNT})
     endif()
 endif()
 
@@ -362,17 +368,17 @@ if(POSTGRESQL_FOUND)
             # set(CONFIGURE_ARGS ${CONFIGURE_ARGS} "-lpq")
             # set(ENV_ARGS "${ENV_ARGS} PSQL_LIBS=\"-lpq\"")
             set(ENV{PSQL_LIBS} "-L${PARENT_DIR} -lpq")
-
-            # Check if build needed
-            build_if_needed(${LINK_SEARCH_PATH} "PostgreSQL" ${CPU_COUNT})
         elseif(WIN32)
             get_target_property(LINK_SEARCH_PATH ${POSTGRESQL_LIBRARIES} IMPORTED_IMPLIB_RELEASE)
             list(APPEND CONFIGURE_ARGS -l ${LINK_SEARCH_PATH})
             set(ENV{PSQL_LIBS} "${LINK_SEARCH_PATH}")
             get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} PATH)
+            set(CONFIGURE_ARGS_LINK_LIBS ${CONFIGURE_ARGS_LINK_LIBS} ${PARENT_DIR})
             set(ENV{LIB} "$ENV{LIB};${PARENT_DIR}")
             set(ENV{INCLUDE} "$ENV{INCLUDE};${POSTGRESQL_INCLUDE_DIRS}")
         endif()
+        # Check if build needed
+        build_if_needed(${LINK_SEARCH_PATH} "PostgreSQL" ${CPU_COUNT})
     endif()
 endif()
 
@@ -473,11 +479,6 @@ if(WIN32)
         COMMENT "${VCVARSALL_BAT} ${VCVARSALL_BAT_ARG} && nmake"
         VERBATIM
     )
-    install(CODE "execute_process(
-        COMMAND ${VCVARSALL_BAT} ${VCVARSALL_BAT_ARG} && nmake install
-        WORKING_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
-        )"
-    )
 else()
     set(CONFIGURE_CMD_NAME configure)
     set(CONFIGURE_CMD ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}/${CONFIGURE_CMD_NAME} ${CONFIGURE_ARGS})
@@ -493,14 +494,9 @@ else()
         COMMENT "${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}/make -j ${CPU_COUNT}"
         VERBATIM
     )
-    install(CODE "execute_process(
-        COMMAND make install
-        WORKING_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
-        )"
-    )
 endif()
 
-# Get cpack zip archive name
+# Get cpack archive name
 get_cpack_filename(${VERSION} PROJECT_CPACK_FILENAME)
 
 if(WIN32)
