@@ -142,6 +142,9 @@ if(ZLIB_FOUND)
     		get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} PATH)
     		set(ENV{LIB} "$ENV{LIB};${PARENT_DIR}")
     		set(ENV{INCLUDE} "$ENV{INCLUDE};${ZLIB_INCLUDE_DIRS}")
+
+            # Stupid Qt4 build fix
+            configure_file(${LINK_SEARCH_PATH} ${PARENT_DIR}/zdll.lib COPYONLY)
         endif()
     endif()
 endif()
