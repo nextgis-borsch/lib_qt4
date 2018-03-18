@@ -159,7 +159,7 @@ if(ZLIB_FOUND)
             warning_message("Copy ${LINK_SEARCH_PATH} to $ENV{USERPROFILE}\\source\\bin\\")
             execute_process(
                 COMMAND ${CMAKE_COMMAND} -E make_directory "$ENV{USERPROFILE}\\source" "$ENV{USERPROFILE}\\source\\bin"
-                COMMAND ${CMAKE_COMMAND} -E copy ${LINK_SEARCH_PATH} "$ENV{USERPROFILE}\\source\\bin\\"
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different ${LINK_SEARCH_PATH} "$ENV{USERPROFILE}\\source\\bin\\zlib1.dll"
             )
             if(NOT EXISTS $ENV{USERPROFILE}/source/bin/zlib1.dll)
                 message(FATAL_ERROR "$ENV{USERPROFILE}\\source\\bin\\zlib1.dll not exists!")
