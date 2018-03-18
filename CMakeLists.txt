@@ -456,6 +456,12 @@ execute_process(COMMAND ${GIT_EXECUTABLE} apply --ignore-whitespace -v  ${CMAKE_
     OUTPUT_QUIET ERROR_QUIET
 )
 
+status_message("Apply patch ${CMAKE_CURRENT_SOURCE_DIR}/patch/fix_build_with_msvc2015.patch")
+execute_process(COMMAND ${GIT_EXECUTABLE} apply --ignore-whitespace -v  ${CMAKE_CURRENT_SOURCE_DIR}/patch/fix_build_with_msvc2015.patch
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
+    OUTPUT_QUIET ERROR_QUIET
+)
+
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/inst)
 
 message(STATUS "Configure args: ${CONFIGURE_ARGS}")
