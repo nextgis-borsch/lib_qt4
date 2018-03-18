@@ -158,7 +158,7 @@ if(ZLIB_FOUND)
             execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${LINK_SEARCH_PATH_I} ${PARENT_DIR}/zdll.lib)
             warning_message("Copy ${LINK_SEARCH_PATH} to $ENV{USERPROFILE}\\source\\bin\\")
             execute_process(
-                COMMAND ${CMAKE_COMMAND} -E make_directory "$ENV{USERPROFILE}\\source\\bin"
+                COMMAND ${CMAKE_COMMAND} -E make_directory "$ENV{USERPROFILE}\\source" "$ENV{USERPROFILE}\\source\\bin"
                 COMMAND ${CMAKE_COMMAND} -E copy ${LINK_SEARCH_PATH} "$ENV{USERPROFILE}\\source\\bin\\"
             )
             if(NOT EXISTS $ENV{USERPROFILE}/source/bin/zlib1.dll)
