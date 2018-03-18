@@ -141,8 +141,8 @@ if(ZLIB_FOUND)
             get_target_property(LINK_SEARCH_PATH_I ${ZLIB_LIBRARIES} IMPORTED_IMPLIB_RELEASE)
             get_filename_component(LINK_NAME ${LINK_SEARCH_PATH_I} NAME_WE)
     		list(APPEND CONFIGURE_ARGS -l ${LINK_NAME})
-    		set(ENV{LIBZ_LIBS} "-L${LINK_SEARCH_PATH_I}")
     		get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH_I} PATH)
+    		set(ENV{LIBZ_LIBS} "-L${PARENT_DIR} -l${LINK_NAME}")
             set(CONFIGURE_ARGS_LINK_LIBS ${CONFIGURE_ARGS_LINK_LIBS} ${PARENT_DIR})
     		set(ENV{LIB} "$ENV{LIB};${PARENT_DIR}")
     		set(ENV{INCLUDE} "$ENV{INCLUDE};${ZLIB_INCLUDE_DIRS}")
@@ -194,37 +194,37 @@ if(OPENSSL_FOUND)
     endif()
 endif()
 
-# find_anyproject(Freetype DEFAULT ON)
-# if(FREETYPE_FOUND)
-#     set(CONFIGURE_ARGS_INCLUDE_DIRS ${CONFIGURE_ARGS_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS})
-#     if(TARGET ${FREETYPE_LIBRARIES})
-#         set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -system-freetype)
-#         if(OSX_FRAMEWORK)
-#             get_target_property(LINK_SEARCH_PATH ${FREETYPE_LIBRARIES} IMPORTED_LOCATION_RELEASE)
-#             get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} DIRECTORY)
-#
-#             set(CONFIGURE_ARGS_LINK_LIBS ${CONFIGURE_ARGS_LINK_LIBS} ${PARENT_DIR})
-#
-#             create_symlink(${PARENT_DIR} "freetype")
-#
-#             # set(CONFIGURE_ARGS ${CONFIGURE_ARGS} "-lfreetype")
-#             # set(ENV_ARGS "${ENV_ARGS} FREETYPE_LIBS=\"-lfreetype\"")
-#             set(ENV{FREETYPE_LIBS} "-L${PARENT_DIR} -lfreetype")
-#
-#         elseif(WIN32)
-#             get_target_property(LINK_SEARCH_PATH ${FREETYPE_LIBRARIES} IMPORTED_IMPLIB_RELEASE)
-#             get_filename_component(LINK_NAME ${LINK_SEARCH_PATH} NAME_WE)
-#     		list(APPEND CONFIGURE_ARGS -l ${LINK_NAME})
-#             set(ENV{FREETYPE_LIBS} "-L${LINK_SEARCH_PATH}")
-#             get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} PATH)
-#             set(CONFIGURE_ARGS_LINK_LIBS ${CONFIGURE_ARGS_LINK_LIBS} ${PARENT_DIR})
-#             set(ENV{LIB} "$ENV{LIB};${PARENT_DIR}")
-#             set(ENV{INCLUDE} "$ENV{INCLUDE};${FREETYPE_INCLUDE_DIRS}")
-#         endif()
-#         # Check if build needed
-#         build_if_needed(${LINK_SEARCH_PATH} "Freetype" ${CPU_COUNT})
-#     endif()
-# endif()
+find_anyproject(Freetype DEFAULT ON)
+if(FREETYPE_FOUND)
+    set(CONFIGURE_ARGS_INCLUDE_DIRS ${CONFIGURE_ARGS_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS})
+    if(TARGET ${FREETYPE_LIBRARIES})
+        set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -system-freetype)
+        if(OSX_FRAMEWORK)
+            get_target_property(LINK_SEARCH_PATH ${FREETYPE_LIBRARIES} IMPORTED_LOCATION_RELEASE)
+            get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} DIRECTORY)
+
+            set(CONFIGURE_ARGS_LINK_LIBS ${CONFIGURE_ARGS_LINK_LIBS} ${PARENT_DIR})
+
+            create_symlink(${PARENT_DIR} "freetype")
+
+            # set(CONFIGURE_ARGS ${CONFIGURE_ARGS} "-lfreetype")
+            # set(ENV_ARGS "${ENV_ARGS} FREETYPE_LIBS=\"-lfreetype\"")
+            set(ENV{FREETYPE_LIBS} "-L${PARENT_DIR} -lfreetype")
+
+        elseif(WIN32)
+            get_target_property(LINK_SEARCH_PATH ${FREETYPE_LIBRARIES} IMPORTED_IMPLIB_RELEASE)
+            get_filename_component(LINK_NAME ${LINK_SEARCH_PATH} NAME_WE)
+    		list(APPEND CONFIGURE_ARGS -l ${LINK_NAME})
+            set(ENV{FREETYPE_LIBS} "-L${LINK_SEARCH_PATH}")
+            get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} PATH)
+            set(CONFIGURE_ARGS_LINK_LIBS ${CONFIGURE_ARGS_LINK_LIBS} ${PARENT_DIR})
+            set(ENV{LIB} "$ENV{LIB};${PARENT_DIR}")
+            set(ENV{INCLUDE} "$ENV{INCLUDE};${FREETYPE_INCLUDE_DIRS}")
+        endif()
+        # Check if build needed
+        build_if_needed(${LINK_SEARCH_PATH} "Freetype" ${CPU_COUNT})
+    endif()
+endif()
 
 # TODO: -harfbuzz ............ Select used HarfBuzz-NG [system/qt/no]
 
@@ -245,14 +245,18 @@ if(JPEG_FOUND)
             # set(ENV_ARGS "${ENV_ARGS} LIBJPEG_LIBS=\"-ljpeg\"")
             set(ENV{LIBJPEG_LIBS} "-L${PARENT_DIR} -ljpeg")
         elseif(WIN32)
-            get_target_property(LINK_SEARCH_PATH ${JPEG_LIBRARIES} IMPORTED_IMPLIB_RELEASE)
-            get_filename_component(LINK_NAME ${LINK_SEARCH_PATH} NAME_WE)
+            get_target_property(LINK_SEARCH_PATH_I ${JPEG_LIBRARIES} IMPORTED_IMPLIB_RELEASE)
+            get_filename_component(LINK_NAME ${LINK_SEARCH_PATH_I} NAME_WE)
     		list(APPEND CONFIGURE_ARGS -l ${LINK_NAME})
-            set(ENV{LIBJPEG_LIBS} "-L${LINK_SEARCH_PATH}")
-            get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} PATH)
+            get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH_I} PATH)
+    		set(ENV{LIBJPEG_LIBS} "-L${PARENT_DIR} -l${LINK_NAME}")
             set(CONFIGURE_ARGS_LINK_LIBS ${CONFIGURE_ARGS_LINK_LIBS} ${PARENT_DIR})
             set(ENV{LIB} "$ENV{LIB};${PARENT_DIR}")
             set(ENV{INCLUDE} "$ENV{INCLUDE};${JPEG_INCLUDE_DIRS}")
+
+            # Stupid Qt4 build fix
+            warning_message("Copy ${LINK_SEARCH_PATH_I} to ${PARENT_DIR}/libjpeg.lib")
+            execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${LINK_SEARCH_PATH_I} ${PARENT_DIR}/libjpeg.lib)
         endif()
         # Check if build needed
         build_if_needed(${LINK_SEARCH_PATH} "JPEG" ${CPU_COUNT})
@@ -276,14 +280,18 @@ if(PNG_FOUND)
             # set(ENV_ARGS "${ENV_ARGS} LIBPNG_LIBS=\"-lpng\"")
             set(ENV{LIBPNG_LIBS} "-L${PARENT_DIR} -lpng")
         elseif(WIN32)
-            get_target_property(LINK_SEARCH_PATH ${PNG_LIBRARIES} IMPORTED_IMPLIB_RELEASE)
-            get_filename_component(LINK_NAME ${LINK_SEARCH_PATH} NAME_WE)
+            get_target_property(LINK_SEARCH_PATH_I ${PNG_LIBRARIES} IMPORTED_IMPLIB_RELEASE)
+            get_filename_component(LINK_NAME ${LINK_SEARCH_PATH_I} NAME_WE)
     		list(APPEND CONFIGURE_ARGS -l ${LINK_NAME})
-            set(ENV{LIBPNG_LIBS} "-L${LINK_SEARCH_PATH}")
-            get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} PATH)
+            get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH_I} PATH)
+            set(ENV{LIBPNG_LIBS} "-L${PARENT_DIR} -l${LINK_NAME}")
             set(CONFIGURE_ARGS_LINK_LIBS ${CONFIGURE_ARGS_LINK_LIBS} ${PARENT_DIR})
             set(ENV{LIB} "$ENV{LIB};${PARENT_DIR}")
             set(ENV{INCLUDE} "$ENV{INCLUDE};${PNG_INCLUDE_DIRS}")
+
+            # Stupid Qt4 build fix
+            warning_message("Copy ${LINK_SEARCH_PATH_I} to ${PARENT_DIR}/libpng.lib")
+            execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${LINK_SEARCH_PATH_I} ${PARENT_DIR}/libpng.lib)
         endif()
         # Check if build needed
         build_if_needed(${LINK_SEARCH_PATH} "PNG" ${CPU_COUNT})
@@ -307,14 +315,18 @@ if(TIFF_FOUND)
             # set(ENV_ARGS "${ENV_ARGS} TIFF_LIBS=\"-ltiff\"")
             set(ENV{TIFF_LIBS} "-L${PARENT_DIR} -ltiff")
         elseif(WIN32)
-            get_target_property(LINK_SEARCH_PATH ${TIFF_LIBRARIES} IMPORTED_IMPLIB_RELEASE)
-            get_filename_component(LINK_NAME ${LINK_SEARCH_PATH} NAME_WE)
+            get_target_property(LINK_SEARCH_PATH_I ${TIFF_LIBRARIES} IMPORTED_IMPLIB_RELEASE)
+            get_filename_component(LINK_NAME ${LINK_SEARCH_PATH_I} NAME_WE)
     		list(APPEND CONFIGURE_ARGS -l ${LINK_NAME})
-            set(ENV{TIFF_LIBS} "-L${LINK_SEARCH_PATH}")
-            get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} PATH)
+            get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH_I} PATH)
+            set(ENV{TIFF_LIBS} "-L${PARENT_DIR} -l${LINK_NAME}")
             set(CONFIGURE_ARGS_LINK_LIBS ${CONFIGURE_ARGS_LINK_LIBS} ${PARENT_DIR})
             set(ENV{LIB} "$ENV{LIB};${PARENT_DIR}")
             set(ENV{INCLUDE} "$ENV{INCLUDE};${TIFF_INCLUDE_DIRS}")
+
+            # Stupid Qt4 build fix
+            warning_message("Copy ${LINK_SEARCH_PATH_I} to ${PARENT_DIR}/libtiff.lib")
+            execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${LINK_SEARCH_PATH_I} ${PARENT_DIR}/libtiff.lib)
         endif()
         # Check if build needed
         build_if_needed(${LINK_SEARCH_PATH} "TIFF" ${CPU_COUNT})
@@ -453,13 +465,13 @@ endif()
 status_message("Apply patch ${CMAKE_CURRENT_SOURCE_DIR}/patch/openssl.patch")
 execute_process(COMMAND ${GIT_EXECUTABLE} apply --ignore-whitespace -v  ${CMAKE_CURRENT_SOURCE_DIR}/patch/openssl.patch
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
-    # OUTPUT_QUIET ERROR_QUIET
+    OUTPUT_QUIET ERROR_QUIET
 )
 
 status_message("Apply patch ${CMAKE_CURRENT_SOURCE_DIR}/patch/fix_build_with_msvc2015.patch")
 execute_process(COMMAND ${GIT_EXECUTABLE} apply --ignore-whitespace -v  ${CMAKE_CURRENT_SOURCE_DIR}/patch/fix_build_with_msvc2015.patch
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
-    # OUTPUT_QUIET ERROR_QUIET
+    OUTPUT_QUIET ERROR_QUIET
 )
 
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/inst)
