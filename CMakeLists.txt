@@ -149,8 +149,8 @@ if(ZLIB_FOUND)
 
             get_filename_component(PATH_DIR ${LINK_SEARCH_PATH} PATH)
             set(ENV{PATH} "$ENV{PATH};${PATH_DIR}")
-            # file(COPY ${LINK_SEARCH_PATH} ENV{USERPROFILE}/source/bin/)
             # Stupid Qt4 build fix
+            file(COPY ${LINK_SEARCH_PATH} ENV{USERPROFILE}/source/bin/)
             configure_file(${LINK_SEARCH_PATH} ${PARENT_DIR}/zdll.lib COPYONLY)
         endif()
         # Check if build needed
