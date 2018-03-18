@@ -229,6 +229,7 @@ if(FREETYPE_FOUND)
             set(CONFIGURE_ARGS_LINK_LIBS ${CONFIGURE_ARGS_LINK_LIBS} ${PARENT_DIR})
             set(ENV{LIB} "$ENV{LIB};${PARENT_DIR}")
             set(ENV{INCLUDE} "$ENV{INCLUDE};${FREETYPE_INCLUDE_DIRS}")
+            file(WRITE ${FREETYPE_INCLUDE_DIRS}/freetype2/unistd.h "/* dummy */")
         endif()
         # Check if build needed
         build_if_needed(${LINK_SEARCH_PATH} "Freetype" ${CPU_COUNT})
