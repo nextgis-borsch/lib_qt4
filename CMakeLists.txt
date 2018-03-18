@@ -101,7 +101,9 @@ if(CPU_COUNT GREATER 1 AND WIN32)
     set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -mp )
 endif()
 
-file(REMOVE_RECURSE "$ENV{USERPROFILE}\\source")
+if(WIN32)
+    file(REMOVE_RECURSE "$ENV{USERPROFILE}\\source")
+endif()
 
 include(FindAnyProject)
 
