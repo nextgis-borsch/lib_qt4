@@ -468,11 +468,13 @@ if(APPLE)
     )
 endif()
 
-status_message("Apply patch ${CMAKE_CURRENT_SOURCE_DIR}/patch/openssl.patch")
-execute_process(COMMAND ${GIT_EXECUTABLE} apply --ignore-whitespace -v  ${CMAKE_CURRENT_SOURCE_DIR}/patch/openssl.patch
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
-    OUTPUT_QUIET ERROR_QUIET
-)
+if(OPENSSL_FOUND AND OPENSSL_VERSION VERSION_GREATER "1.0.2")
+    status_message("Apply patch ${CMAKE_CURRENT_SOURCE_DIR}/patch/openssl.patch")
+    execute_process(COMMAND ${GIT_EXECUTABLE} apply --ignore-whitespace -v  ${CMAKE_CURRENT_SOURCE_DIR}/patch/openssl.patch
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${QT_INPUT_NAME}
+        OUTPUT_QUIET ERROR_QUIET
+    )
+endif()
 
 status_message("Apply patch ${CMAKE_CURRENT_SOURCE_DIR}/patch/fix_build_with_msvc2015.patch")
 execute_process(COMMAND ${GIT_EXECUTABLE} apply --ignore-whitespace -v  ${CMAKE_CURRENT_SOURCE_DIR}/patch/fix_build_with_msvc2015.patch
