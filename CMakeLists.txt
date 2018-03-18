@@ -150,8 +150,10 @@ if(ZLIB_FOUND)
             get_filename_component(PATH_DIR ${LINK_SEARCH_PATH} PATH)
             set(ENV{PATH} "$ENV{PATH};${PATH_DIR}")
             # Stupid Qt4 build fix
-            file(COPY ${LINK_SEARCH_PATH} DESTINATION $ENV{USERPROFILE}/source/bin/)
-            configure_file(${LINK_SEARCH_PATH} ${PARENT_DIR}/zdll.lib COPYONLY)
+            warning_message("Copy ${LINK_SEARCH_PATH_I} to ${PARENT_DIR}/zdll.lib")
+            execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${LINK_SEARCH_PATH_I} ${PARENT_DIR}/zdll.lib)
+            warning_message("Copy ${LINK_SEARCH_PATH} to $ENV{USERPROFILE}/source/bin/")
+            execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${LINK_SEARCH_PATH} $ENV{USERPROFILE}/source/bin/)
         endif()
         # Check if build needed
         build_if_needed(${LINK_SEARCH_PATH} "ZLIB" CPU_COUNT)
@@ -189,37 +191,37 @@ if(OPENSSL_FOUND)
     endif()
 endif()
 
-find_anyproject(Freetype DEFAULT ON)
-if(FREETYPE_FOUND)
-    set(CONFIGURE_ARGS_INCLUDE_DIRS ${CONFIGURE_ARGS_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS})
-    if(TARGET ${FREETYPE_LIBRARIES})
-        set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -system-freetype)
-        if(OSX_FRAMEWORK)
-            get_target_property(LINK_SEARCH_PATH ${FREETYPE_LIBRARIES} IMPORTED_LOCATION_RELEASE)
-            get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} DIRECTORY)
-
-            set(CONFIGURE_ARGS_LINK_LIBS ${CONFIGURE_ARGS_LINK_LIBS} ${PARENT_DIR})
-
-            create_symlink(${PARENT_DIR} "freetype")
-
-            # set(CONFIGURE_ARGS ${CONFIGURE_ARGS} "-lfreetype")
-            # set(ENV_ARGS "${ENV_ARGS} FREETYPE_LIBS=\"-lfreetype\"")
-            set(ENV{FREETYPE_LIBS} "-L${PARENT_DIR} -lfreetype")
-
-        elseif(WIN32)
-            get_target_property(LINK_SEARCH_PATH ${FREETYPE_LIBRARIES} IMPORTED_IMPLIB_RELEASE)
-            get_filename_component(LINK_NAME ${LINK_SEARCH_PATH} NAME_WE)
-    		list(APPEND CONFIGURE_ARGS -l ${LINK_NAME})
-            set(ENV{FREETYPE_LIBS} "-L${LINK_SEARCH_PATH}")
-            get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} PATH)
-            set(CONFIGURE_ARGS_LINK_LIBS ${CONFIGURE_ARGS_LINK_LIBS} ${PARENT_DIR})
-            set(ENV{LIB} "$ENV{LIB};${PARENT_DIR}")
-            set(ENV{INCLUDE} "$ENV{INCLUDE};${FREETYPE_INCLUDE_DIRS}")
-        endif()
-        # Check if build needed
-        build_if_needed(${LINK_SEARCH_PATH} "Freetype" ${CPU_COUNT})
-    endif()
-endif()
+# find_anyproject(Freetype DEFAULT ON)
+# if(FREETYPE_FOUND)
+#     set(CONFIGURE_ARGS_INCLUDE_DIRS ${CONFIGURE_ARGS_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS})
+#     if(TARGET ${FREETYPE_LIBRARIES})
+#         set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -system-freetype)
+#         if(OSX_FRAMEWORK)
+#             get_target_property(LINK_SEARCH_PATH ${FREETYPE_LIBRARIES} IMPORTED_LOCATION_RELEASE)
+#             get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} DIRECTORY)
+#
+#             set(CONFIGURE_ARGS_LINK_LIBS ${CONFIGURE_ARGS_LINK_LIBS} ${PARENT_DIR})
+#
+#             create_symlink(${PARENT_DIR} "freetype")
+#
+#             # set(CONFIGURE_ARGS ${CONFIGURE_ARGS} "-lfreetype")
+#             # set(ENV_ARGS "${ENV_ARGS} FREETYPE_LIBS=\"-lfreetype\"")
+#             set(ENV{FREETYPE_LIBS} "-L${PARENT_DIR} -lfreetype")
+#
+#         elseif(WIN32)
+#             get_target_property(LINK_SEARCH_PATH ${FREETYPE_LIBRARIES} IMPORTED_IMPLIB_RELEASE)
+#             get_filename_component(LINK_NAME ${LINK_SEARCH_PATH} NAME_WE)
+#     		list(APPEND CONFIGURE_ARGS -l ${LINK_NAME})
+#             set(ENV{FREETYPE_LIBS} "-L${LINK_SEARCH_PATH}")
+#             get_filename_component(PARENT_DIR ${LINK_SEARCH_PATH} PATH)
+#             set(CONFIGURE_ARGS_LINK_LIBS ${CONFIGURE_ARGS_LINK_LIBS} ${PARENT_DIR})
+#             set(ENV{LIB} "$ENV{LIB};${PARENT_DIR}")
+#             set(ENV{INCLUDE} "$ENV{INCLUDE};${FREETYPE_INCLUDE_DIRS}")
+#         endif()
+#         # Check if build needed
+#         build_if_needed(${LINK_SEARCH_PATH} "Freetype" ${CPU_COUNT})
+#     endif()
+# endif()
 
 # TODO: -harfbuzz ............ Select used HarfBuzz-NG [system/qt/no]
 
