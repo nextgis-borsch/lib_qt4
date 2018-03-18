@@ -152,17 +152,11 @@ if(ZLIB_FOUND)
             # Stupid Qt4 build fix
             warning_message("Copy ${LINK_SEARCH_PATH_I} to ${PARENT_DIR}/zdll.lib")
             execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${LINK_SEARCH_PATH_I} ${PARENT_DIR}/zdll.lib)
-            if(NOT EXISTS ${LINK_SEARCH_PATH})
-                message(FATAL_ERROR "${LINK_SEARCH_PATH} not exists!")
-            endif()
             warning_message("Copy ${LINK_SEARCH_PATH} to $ENV{USERPROFILE}\\source\\bin\\")
             execute_process(
                 COMMAND ${CMAKE_COMMAND} -E make_directory "$ENV{USERPROFILE}\\source\\bin"
                 COMMAND ${CMAKE_COMMAND} -E copy ${LINK_SEARCH_PATH} "$ENV{USERPROFILE}\\source\\bin\\"
             )
-            if(NOT EXISTS $ENV{USERPROFILE}/source/bin)
-                message(FATAL_ERROR "$ENV{USERPROFILE}\\source\\bin not exists!")
-            endif()
             if(NOT EXISTS $ENV{USERPROFILE}/source/bin/zlib1.dll)
                 message(FATAL_ERROR "$ENV{USERPROFILE}\\source\\bin\\zlib1.dll not exists!")
             endif()
