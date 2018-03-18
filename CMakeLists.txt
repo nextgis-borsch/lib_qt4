@@ -152,8 +152,11 @@ if(ZLIB_FOUND)
             # Stupid Qt4 build fix
             warning_message("Copy ${LINK_SEARCH_PATH_I} to ${PARENT_DIR}/zdll.lib")
             execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${LINK_SEARCH_PATH_I} ${PARENT_DIR}/zdll.lib)
-            warning_message("Copy ${LINK_SEARCH_PATH} to $ENV{USERPROFILE}/source/bin/")
-            execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${LINK_SEARCH_PATH} $ENV{USERPROFILE}/source/bin/)
+            warning_message("Copy ${LINK_SEARCH_PATH} to $ENV{USERPROFILE}\\source\\bin\\")
+            execute_process(
+                COMMAND ${CMAKE_COMMAND} -E make_directory "$ENV{USERPROFILE}\\source\\bin"
+                COMMAND ${CMAKE_COMMAND} -E copy ${LINK_SEARCH_PATH} "$ENV{USERPROFILE}\\source\\bin\\"
+            )
         endif()
         # Check if build needed
         build_if_needed(${LINK_SEARCH_PATH} "ZLIB" CPU_COUNT)
