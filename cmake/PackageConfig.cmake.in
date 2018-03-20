@@ -10,6 +10,17 @@ get_filename_component(QT_ROOT "${CMAKE_CURRENT_LIST_DIR}" PATH)
 
 set(QT_QMAKE_EXECUTABLE ${QT_ROOT}/bin/qmake${CMAKE_EXECUTABLE_SUFFIX})
 
+function(_QT4_QUERY_QMAKE VAR RESULT)
+  execute_process(COMMAND "${QT_QMAKE_EXECUTABLE}" -query ${VAR}
+    RESULT_VARIABLE return_code
+    OUTPUT_VARIABLE output
+    OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_STRIP_TRAILING_WHITESPACE)
+  if(NOT return_code)
+    file(TO_CMAKE_PATH "${output}" output)
+    set(${RESULT} ${output} PARENT_SCOPE)
+  endif()
+endfunction()
+
 set(@PACKAGE_UPPER_NAME@_QMAKE_EXECUTABLE ${QT_QMAKE_EXECUTABLE})
 
 set(QT_EXECUTABLES
@@ -22,7 +33,7 @@ foreach(QT_EXE ${QT_EXECUTABLES})
 endforeach()
 
 set(QT_MODULES
-    QtGui Qt3Support QtSvg QtScript QtTest QtUiTools QtHelp QtWebKit
+    QtCore QtGui Qt3Support QtSvg QtScript QtTest QtUiTools QtHelp QtWebKit
     QtXmlPatterns phonon QtNetwork QtMultimedia QtNsPlugin QtOpenGL
     QtSql QtXml QtDesigner QtDBus QtScriptTools QtDeclarative
 )
@@ -30,27 +41,32 @@ set(QT_MODULES
 foreach(QT_MODULE ${QT_MODULES})
     set(_MOD_PATH ${QT_ROOT}/lib/${QT_MODULE})
     if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-        set(_MOD_PATH "${_MOD_PATH}.framework"
+        set(_MOD_PATH "${_MOD_PATH}.framework")
     endif()
-    if(EXISTS _MOD_PATH)
+    if(EXISTS "${_MOD_PATH}")
         set(_INCLUDE_DIR)
         add_library(Qt4::${QT_MODULE} SHARED IMPORTED)
+        string(REGEX REPLACE "^QT" "" _stemname ${QT_MODULE})
+        set_property(TARGET Qt4::${QT_MODULE} PROPERTY
+            INTERFACE_COMPILE_DEFINITIONS "QT_${_stemname}_LIB"
+        )
         if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
             set_property(TARGET Qt4::${QT_MODULE} PROPERTY FRAMEWORK 1)
+            set(_INCLUDE_DIR "${_MOD_PATH}" "${_MOD_PATH}/Versions/4/Headers")
+            set_property(TARGET Qt4::${QT_MODULE} PROPERTY
+                INTERFACE_INCLUDE_DIRECTORIES ${_INCLUDE_DIR}
+            )
             set_target_properties(Qt4::${QT_MODULE} PROPERTIES
-                INTERFACE_INCLUDE_DIRECTORIES "${_MOD_PATH}/Versions/4/Headers"
                 IMPORTED_LOCATION_RELEASE "${_MOD_PATH}/Versions/4/${QT_MODULE}"
                 IMPORTED_SONAME_RELEASE "@rpath/${QT_MODULE}.framework/Versions/4/${QT_MODULE}"
             )
-            set(_INCLUDE_DIR "${_MOD_PATH}/Versions/4/Headers")
-        else(
+        else()
             set_target_properties(Qt4::${QT_MODULE} PROPERTIES
                 INTERFACE_INCLUDE_DIRECTORIES "${QT_ROOT}/include"
                 IMPORTED_IMPLIB_RELEASE "${_MOD_PATH}${CMAKE_STATIC_LIBRARY_SUFFIX}"
                 IMPORTED_LOCATION_RELEASE "${QT_ROOT}/bin/${QT_MODULE}${CMAKE_SHARED_LIBRARY_SUFFIX}"
             )
             set(_INCLUDE_DIR "${QT_ROOT}/include")
-        )
         endif()
 
         string(TOUPPER ${QT_MODULE} QT_MODULE_UPPER_NAME)
@@ -60,8 +76,8 @@ foreach(QT_MODULE ${QT_MODULES})
         set(QT_${QT_MODULE_UPPER_NAME}_FOUND TRUE)
         set(QT_USE_${QT_MODULE_UPPER_NAME} 1)
 
-        set(@PACKAGE_UPPER_NAME@_INCLUDE_DIRS ${@PACKAGE_UPPER_NAME@_INCLUDE_DIRS} QT_${QT_MODULE_UPPER_NAME}_INCLUDE_DIRS)
-        set(@PACKAGE_UPPER_NAME@_LIBRARIES ${@PACKAGE_UPPER_NAME@_LIBRARIES} QT_${QT_MODULE_UPPER_NAME}_LIBRARIES)
+        set(@PACKAGE_UPPER_NAME@_INCLUDE_DIRS ${@PACKAGE_UPPER_NAME@_INCLUDE_DIRS} ${QT_${QT_MODULE_UPPER_NAME}_INCLUDE_DIRS})
+        set(@PACKAGE_UPPER_NAME@_LIBRARIES ${@PACKAGE_UPPER_NAME@_LIBRARIES} ${QT_${QT_MODULE_UPPER_NAME}_LIBRARIES})
     endif()
 endforeach()
 
