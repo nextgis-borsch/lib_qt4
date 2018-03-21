@@ -42,8 +42,10 @@ foreach(QT_MODULE ${QT_MODULES})
     set(_MOD_PATH ${QT_ROOT}/lib/${QT_MODULE})
     if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
         set(_MOD_PATH "${_MOD_PATH}.framework")
+    else()
+        set(_MOD_PATH "${_MOD_PATH}4")
     endif()
-    if(EXISTS "${_MOD_PATH}")
+    if(EXISTS "${_MOD_PATH}" OR EXISTS "${_MOD_PATH}${CMAKE_STATIC_LIBRARY_SUFFIX}")
         set(_INCLUDE_DIR)
         add_library(Qt4::${QT_MODULE} SHARED IMPORTED)
         string(REGEX REPLACE "^QT" "" _stemname ${QT_MODULE})
@@ -61,12 +63,14 @@ foreach(QT_MODULE ${QT_MODULES})
                 IMPORTED_SONAME_RELEASE "@rpath/${QT_MODULE}.framework/Versions/4/${QT_MODULE}"
             )
         else()
+            set(_INCLUDE_DIR "${QT_ROOT}/include" "${QT_ROOT}/include/${QT_MODULE}")
+            set_property(TARGET Qt4::${QT_MODULE} PROPERTY
+                INTERFACE_INCLUDE_DIRECTORIES ${_INCLUDE_DIR}
+            )
             set_target_properties(Qt4::${QT_MODULE} PROPERTIES
-                INTERFACE_INCLUDE_DIRECTORIES "${QT_ROOT}/include"
                 IMPORTED_IMPLIB_RELEASE "${_MOD_PATH}${CMAKE_STATIC_LIBRARY_SUFFIX}"
                 IMPORTED_LOCATION_RELEASE "${QT_ROOT}/bin/${QT_MODULE}${CMAKE_SHARED_LIBRARY_SUFFIX}"
             )
-            set(_INCLUDE_DIR "${QT_ROOT}/include")
         endif()
 
         string(TOUPPER ${QT_MODULE} QT_MODULE_UPPER_NAME)
