@@ -28,8 +28,10 @@ set(QT_EXECUTABLES
 )
 
 foreach(QT_EXE ${QT_EXECUTABLES})
-    add_executable(Qt4::${QT_EXE} IMPORTED)
-    set_property(TARGET Qt4::${QT_EXE} PROPERTY IMPORTED_LOCATION ${QT_ROOT}/bin/${QT_EXE}${CMAKE_EXECUTABLE_SUFFIX})
+    if(NOT TARGET Qt4::${QT_EXE})
+        add_executable(Qt4::${QT_EXE} IMPORTED)
+        set_property(TARGET Qt4::${QT_EXE} PROPERTY IMPORTED_LOCATION ${QT_ROOT}/bin/${QT_EXE}${CMAKE_EXECUTABLE_SUFFIX})
+    endif()
 endforeach()
 
 set(QT_MODULES
@@ -46,31 +48,33 @@ foreach(QT_MODULE ${QT_MODULES})
         set(_MOD_PATH "${_MOD_PATH}4")
     endif()
     if(EXISTS "${_MOD_PATH}" OR EXISTS "${_MOD_PATH}${CMAKE_STATIC_LIBRARY_SUFFIX}")
-        set(_INCLUDE_DIR)
-        add_library(Qt4::${QT_MODULE} SHARED IMPORTED)
-        string(REGEX REPLACE "^QT" "" _stemname ${QT_MODULE})
-        set_property(TARGET Qt4::${QT_MODULE} PROPERTY
-            INTERFACE_COMPILE_DEFINITIONS "QT_${_stemname}_LIB"
-        )
-        if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-            set_property(TARGET Qt4::${QT_MODULE} PROPERTY FRAMEWORK 1)
-            set(_INCLUDE_DIR "${_MOD_PATH}" "${_MOD_PATH}/Versions/4/Headers")
+        if(NOT TARGET Qt4::${QT_MODULE})
+            set(_INCLUDE_DIR)
+            add_library(Qt4::${QT_MODULE} SHARED IMPORTED)
+            string(REGEX REPLACE "^QT" "" _stemname ${QT_MODULE})
             set_property(TARGET Qt4::${QT_MODULE} PROPERTY
-                INTERFACE_INCLUDE_DIRECTORIES ${_INCLUDE_DIR}
+                INTERFACE_COMPILE_DEFINITIONS "QT_${_stemname}_LIB"
             )
-            set_target_properties(Qt4::${QT_MODULE} PROPERTIES
-                IMPORTED_LOCATION_RELEASE "${_MOD_PATH}/Versions/4/${QT_MODULE}"
-                IMPORTED_SONAME_RELEASE "@rpath/${QT_MODULE}.framework/Versions/4/${QT_MODULE}"
-            )
-        else()
-            set(_INCLUDE_DIR "${QT_ROOT}/include" "${QT_ROOT}/include/${QT_MODULE}")
-            set_property(TARGET Qt4::${QT_MODULE} PROPERTY
-                INTERFACE_INCLUDE_DIRECTORIES ${_INCLUDE_DIR}
-            )
-            set_target_properties(Qt4::${QT_MODULE} PROPERTIES
-                IMPORTED_IMPLIB_RELEASE "${_MOD_PATH}${CMAKE_STATIC_LIBRARY_SUFFIX}"
-                IMPORTED_LOCATION_RELEASE "${QT_ROOT}/bin/${QT_MODULE}${CMAKE_SHARED_LIBRARY_SUFFIX}"
-            )
+            if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+                set_property(TARGET Qt4::${QT_MODULE} PROPERTY FRAMEWORK 1)
+                set(_INCLUDE_DIR "${_MOD_PATH}" "${_MOD_PATH}/Versions/4/Headers")
+                set_property(TARGET Qt4::${QT_MODULE} PROPERTY
+                    INTERFACE_INCLUDE_DIRECTORIES ${_INCLUDE_DIR}
+                )
+                set_target_properties(Qt4::${QT_MODULE} PROPERTIES
+                    IMPORTED_LOCATION_RELEASE "${_MOD_PATH}/Versions/4/${QT_MODULE}"
+                    IMPORTED_SONAME_RELEASE "@rpath/${QT_MODULE}.framework/Versions/4/${QT_MODULE}"
+                )
+            else()
+                set(_INCLUDE_DIR "${QT_ROOT}/include" "${QT_ROOT}/include/${QT_MODULE}")
+                set_property(TARGET Qt4::${QT_MODULE} PROPERTY
+                    INTERFACE_INCLUDE_DIRECTORIES ${_INCLUDE_DIR}
+                )
+                set_target_properties(Qt4::${QT_MODULE} PROPERTIES
+                    IMPORTED_IMPLIB_RELEASE "${_MOD_PATH}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+                    IMPORTED_LOCATION_RELEASE "${QT_ROOT}/bin/${QT_MODULE}${CMAKE_SHARED_LIBRARY_SUFFIX}"
+                )
+            endif()
         endif()
 
         string(TOUPPER ${QT_MODULE} QT_MODULE_UPPER_NAME)
