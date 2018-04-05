@@ -61,17 +61,17 @@ foreach(QT_MODULE ${STATIC_QT_MODULES})
             set_property(TARGET Qt4::${QT_MODULE} PROPERTY
                 INTERFACE_LINK_LIBRARIES "${_MOD_PATH}${CMAKE_STATIC_LIBRARY_SUFFIX}"
             )
-            if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-                set_target_properties(Qt4::${QT_MODULE} PROPERTIES
-                #    IMPORTED_IMPLIB_RELEASE "${_MOD_PATH}${CMAKE_STATIC_LIBRARY_SUFFIX}"
-                    IMPORTED_LOCATION_RELEASE "${_MOD_PATH}${CMAKE_STATIC_LIBRARY_SUFFIX}"
-                )
-            else()
-                set_target_properties(Qt4::${QT_MODULE} PROPERTIES
-                    IMPORTED_IMPLIB_RELEASE "${_MOD_PATH}${CMAKE_STATIC_LIBRARY_SUFFIX}"
-                #    IMPORTED_LOCATION_RELEASE "${QT_ROOT}/bin/${QT_MODULE}4${CMAKE_SHARED_LIBRARY_SUFFIX}"
-                )
-            endif()
+            # if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+            #     set_target_properties(Qt4::${QT_MODULE} PROPERTIES
+            #     #    IMPORTED_IMPLIB_RELEASE "${_MOD_PATH}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+            #         IMPORTED_LOCATION_RELEASE "${_MOD_PATH}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+            #     )
+            # else()
+            #     set_target_properties(Qt4::${QT_MODULE} PROPERTIES
+            #         IMPORTED_IMPLIB_RELEASE "${_MOD_PATH}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+            #     #    IMPORTED_LOCATION_RELEASE "${QT_ROOT}/bin/${QT_MODULE}4${CMAKE_SHARED_LIBRARY_SUFFIX}"
+            #     )
+            # endif()
         endif()
 
         string(TOUPPER ${QT_MODULE} QT_MODULE_UPPER_NAME)
