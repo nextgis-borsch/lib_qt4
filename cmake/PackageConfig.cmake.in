@@ -58,6 +58,9 @@ foreach(QT_MODULE ${STATIC_QT_MODULES})
             set_property(TARGET Qt4::${QT_MODULE} PROPERTY
                 INTERFACE_INCLUDE_DIRECTORIES ${_INCLUDE_DIR}
             )
+            set_property(TARGET Qt4::${QT_MODULE} PROPERTY
+                INTERFACE_LINK_LIBRARIES "${_MOD_PATH}${CMAKE_STATIC_LIBRARY_SUFFIX}"
+            )
             if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
                 set_target_properties(Qt4::${QT_MODULE} PROPERTIES
                 #    IMPORTED_IMPLIB_RELEASE "${_MOD_PATH}${CMAKE_STATIC_LIBRARY_SUFFIX}"
