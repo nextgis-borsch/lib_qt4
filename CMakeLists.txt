@@ -203,6 +203,7 @@ endif()
 
 if(NOT WIN32)
 find_anyproject(Freetype DEFAULT ON)
+endif()
 if(FREETYPE_FOUND)
     set(CONFIGURE_ARGS_INCLUDE_DIRS ${CONFIGURE_ARGS_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS})
     if(TARGET ${FREETYPE_LIBRARIES})
@@ -233,7 +234,6 @@ if(FREETYPE_FOUND)
         # Check if build needed
         build_if_needed(${LINK_SEARCH_PATH} "Freetype" ${CPU_COUNT})
     endif()
-endif()
 endif()
 
 # TODO: -harfbuzz ............ Select used HarfBuzz-NG [system/qt/no]
