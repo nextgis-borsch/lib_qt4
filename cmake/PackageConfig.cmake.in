@@ -66,7 +66,7 @@ foreach(QT_MODULE ${STATIC_QT_MODULES})
             else()
                 set_target_properties(Qt4::${QT_MODULE} PROPERTIES
                     IMPORTED_IMPLIB_RELEASE "${_MOD_PATH}${CMAKE_STATIC_LIBRARY_SUFFIX}"
-                #    IMPORTED_LOCATION_RELEASE "${QT_ROOT}/bin/${QT_MODULE}${CMAKE_SHARED_LIBRARY_SUFFIX}"
+                #    IMPORTED_LOCATION_RELEASE "${QT_ROOT}/bin/${QT_MODULE}4${CMAKE_SHARED_LIBRARY_SUFFIX}"
                 )
             endif()
         endif()
@@ -121,7 +121,7 @@ foreach(QT_MODULE ${QT_MODULES})
                 )
                 set_target_properties(Qt4::${QT_MODULE} PROPERTIES
                     IMPORTED_IMPLIB_RELEASE "${_MOD_PATH}${CMAKE_STATIC_LIBRARY_SUFFIX}"
-                    IMPORTED_LOCATION_RELEASE "${QT_ROOT}/bin/${QT_MODULE}${CMAKE_SHARED_LIBRARY_SUFFIX}"
+                    IMPORTED_LOCATION_RELEASE "${QT_ROOT}/bin/${QT_MODULE}4${CMAKE_SHARED_LIBRARY_SUFFIX}"
                 )
             endif()
         endif()
