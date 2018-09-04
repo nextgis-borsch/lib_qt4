@@ -559,6 +559,7 @@ add_custom_target(preinstall_qt ALL
 
 if(OSX_FRAMEWORK)
     find_package(PythonInterp REQUIRED)
+    # FIXME: Uncomment fix zlib paths for WITH_ZLIB_EXTERNAL
     install(CODE "execute_process(COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/cmake/mac_rpath_fix.py
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         )"
