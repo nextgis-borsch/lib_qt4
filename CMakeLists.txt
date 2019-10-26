@@ -420,6 +420,11 @@ if(POSTGRESQL_FOUND)
     endif()
 endif()
 
+# Add OBDC support
+if(WIN32)
+    set(CONFIGURE_ARGS ${CONFIGURE_ARGS} -plugin-sql-odbc)
+endif()
+
 foreach(CONF_INC_DIR ${CONFIGURE_ARGS_INCLUDE_DIRS})
     list(APPEND CONFIGURE_ARGS -I ${CONF_INC_DIR})
 endforeach()
