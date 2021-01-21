@@ -438,8 +438,10 @@ foreach(CONF_LINK_LIB ${CONFIGURE_ARGS_LINK_LIBS})
 endforeach()
 
 #http://download.qt.io/official_releases/qt/5.7/5.7.1/single/qt-everywhere-opensource-src-5.7.1.tar.gz
+#http://mirrors.sohu.com/qt-all/archive/qt/4.8/4.8.7/qt-everywhere-opensource-src-4.8.7.tar.gz
 set(QT_INPUT_NAME "qt-everywhere-opensource-src-${VERSION}")
-set(DOWNLOAD_URL "http://download.qt.io/archive/qt/${QT_MAJOR_VERSION}.${QT_MINOR_VERSION}/${VERSION}/${SUBFOLDER}${QT_INPUT_NAME}.tar.gz")
+#set(DOWNLOAD_URL "http://download.qt.io/archive/qt/${QT_MAJOR_VERSION}.${QT_MINOR_VERSION}/${VERSION}/${SUBFOLDER}${QT_INPUT_NAME}.tar.gz")
+set(DOWNLOAD_URL "http://mirrors.sohu.com/qt-all/archive/qt/${QT_MAJOR_VERSION}.${QT_MINOR_VERSION}/${VERSION}/${SUBFOLDER}${QT_INPUT_NAME}.tar.gz")
 set(OUT_NAME "qt.tar.gz")
 
 if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${OUT_NAME}")
